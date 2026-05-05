@@ -28,7 +28,6 @@ Perfect for:
 **Inputs:**
 
 - `query` (string, required) — The prompt or question to send to Gemini
-- `gemini_api_key` (string, required) — Valid Google Gemini API key
 - `model` (string, optional) — Model to use for generation (default: "gemini-2.5-flash")
 
 **Output:**
@@ -47,7 +46,6 @@ POST /mcp/cl-llm-query/gemini_ai_generate_text
 
 {
   "query": "Write a short story about a robot learning to paint",
-  "gemini_api_key": "AIzaSyDxxxxxxxxxxxxxxxxxxxxxx",
   "model": "gemini-2.5-flash"
 }
 ```
@@ -166,6 +164,7 @@ Ensure your API key has access to:
 - **[Google Cloud Console](https://console.cloud.google.com/)** — Credentials management
 - **[Gemini API Reference](https://ai.google.dev/api)** — Complete Gemini API endpoint reference
 - **[FastMCP Docs](https://gofastmcp.com/v2/getting-started/welcome)** — FastMCP specification
+- **[FastMCP Credentials](https://pypi.org/project/fastmcp-credentials/)** — FastMCP Credentials pakage for credentials handlings.
 </details>
 
 ---
