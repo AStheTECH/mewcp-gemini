@@ -28,7 +28,7 @@ Perfect for:
 **Inputs:**
 
 ```
-- `query` (string, required) — The prompt or question to send to Gemini
+- `query` (string, <span style="color:red">**required**</span>) — The prompt or question to send to Gemini
 - `model` (string, optional) — Model to use for generation (default: "gemini-2.5-flash")
 ```
 
