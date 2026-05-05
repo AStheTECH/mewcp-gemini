@@ -1,6 +1,10 @@
 import logging
 
 from fastmcp import FastMCP
+from fastmcp_credentials import (
+    CredentialMiddleware,
+    HeaderCredentialBackend,
+)
 from gemini_mcp.cli import parse_args
 from gemini_mcp.tools import register_tools
 
@@ -9,7 +13,13 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("gemini-mcp-server")
 
 
-mcp = FastMCP("Gemini LLM Query MCP Server")
+# Select credential backend based on deployment mode
+backend = HeaderCredentialBackend()
+
+mcp = FastMCP(
+    "Gemini LLM Query MCP Server",
+    middleware=[CredentialMiddleware(backend)],
+)
 register_tools(mcp)
 
 # Expose ASGI app for hosting platform's (e.g. Vercel) Python runtime.
