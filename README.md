@@ -27,8 +27,10 @@ Perfect for:
 
 **Inputs:**
 
+```json
 - `query` (string, required) — The prompt or question to send to Gemini
 - `model` (string, optional) — Model to use for generation (default: "gemini-2.5-flash")
+```
 
 **Output:**
 
@@ -36,17 +38,6 @@ Perfect for:
 {
   "prompt": "Your original query",
   "response": "Generated text response from Gemini"
-}
-```
-
-**Usage Example:**
-
-```bash
-POST /mcp/cl-llm-query/gemini_ai_generate_text
-
-{
-  "query": "Write a short story about a robot learning to paint",
-  "model": "gemini-2.5-flash"
 }
 ```
 
