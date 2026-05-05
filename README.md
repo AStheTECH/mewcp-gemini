@@ -27,7 +27,7 @@ Perfect for:
 
 **Inputs:**
 
-```json
+```
 - `query` (string, required) — The prompt or question to send to Gemini
 - `model` (string, optional) — Model to use for generation (default: "gemini-2.5-flash")
 ```
