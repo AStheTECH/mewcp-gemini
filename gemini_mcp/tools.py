@@ -11,8 +11,13 @@ from typing import Optional
 def register_tools(mcp: FastMCP) -> None:
     @mcp.tool("gemini_ai_generate_text", description="Generate text using Gemini LLM")
     def gemini_ai_generate_text(
-        query: str = Field(..., description="Natural language prompt to send to Gemini."),
-        model: Optional[str] = Field(default="gemini-2.5-flash", description="Gemini model name, e.g., 'gemini-2.5-flash' or 'gemini-2.5-pro'."),
+        query: str = Field(
+            ..., description="Natural language prompt to send to Gemini."
+        ),
+        model: Optional[str] = Field(
+            default="gemini-2.5-flash",
+            description="Gemini model name, e.g., 'gemini-2.5-flash' or 'gemini-2.5-pro'.",
+        ),
     ) -> GeminiGenerateTextResponse:
         """
         Returns:
@@ -20,7 +25,7 @@ def register_tools(mcp: FastMCP) -> None:
         """
         creds = get_credentials()
         headers = {"Content-Type": "application/json"}
-        params = {"key": creds.api_key}
+        params = {"key": creds.fields["api_key"]}
 
         body = {"contents": [{"parts": [{"text": query}]}]}
 

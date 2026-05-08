@@ -18,7 +18,7 @@ backend = HeaderCredentialBackend()
 
 mcp = FastMCP(
     "Gemini LLM Query MCP Server",
-    middleware=[CredentialMiddleware(backend)],
+    middleware=[CredentialMiddleware(backend, "static")],
 )
 register_tools(mcp)
 
