@@ -1,161 +1,147 @@
-**Generate text using Google's Gemini LLM via API.**
+**Access Google's most capable AI models through a single MCP tool.**
 
-A Model Context Protocol (MCP) server that exposes Google Gemini's API for generating text content.
+A Model Context Protocol (MCP) server that exposes Google Gemini's API for generating text using state-of-the-art large language models.
 
----
 
 ## Overview
 
-The Gemini MCP Server provides stateless, multi-user access to Gemini's core operations:
+The Gemini MCP Server provides direct access to Google's Gemini LLMs:
 
-- **Text Generation** — Generate high-quality text using the Gemini LLM
-- **Flexible Prompting** — Support for custom queries and model selection
-- **API Integration** — Seamless integration with the Gemini API
+- Generate high-quality text responses from natural language prompts
+- Choose between fast and capable Gemini model variants
+- Integrate Gemini's reasoning into any MCP-compatible AI workflow
 
 Perfect for:
 
-- Building AI-powered content generation workflows
-- Automating text creation tasks
-- Integrating LLM capabilities into multi-agent systems
+- AI agents that need to delegate subtasks to a powerful LLM
+- Generating summaries, translations, code, or creative content
+- Augmenting workflows with Gemini's reasoning and language capabilities
 
----
 
 ## Tools
 
 <details>
 <summary><code>gemini_ai_generate_text</code> — Generate text using Gemini LLM</summary>
 
-**Inputs:**
+Sends a prompt to Google Gemini and returns the generated text response.
 
+**Inputs:**
 ```
-- `query` (string, <span style="color:red">**required**</span>) — The prompt or question to send to Gemini
-- `model` (string, optional) — Model to use for generation (default: "gemini-2.5-flash")
+- `query` (string, required) — Natural language prompt to send to Gemini
+- `model` (string, optional) — Gemini model to use: gemini-2.5-flash (default) or gemini-2.5-pro
 ```
 
 **Output:**
 
 ```json
 {
-  "prompt": "Your original query",
-  "response": "Generated text response from Gemini"
+  "prompt": "Summarize the history of the internet",
+  "response": "The internet began as ARPANET in the late 1960s..."
 }
 ```
 
 </details>
 
----
 
-## Reference & Support
+## API Parameters Reference
 
 <details>
-<summary><strong>API Parameters Reference</strong></summary>
+<summary><strong>Available Models</strong></summary>
 
-### Model Selection
-
-- `model` — Specifies which Gemini model to use (default: "gemini-2.5-flash")
-
-### Available Models
-
-**Gemini Models:**
-
-```
-gemini-2.5-flash — Fast, efficient model for quick text generation
-gemini-2.0-pro — Advanced model for complex queries
-gemini-1.5-pro — Standard pro model
-```
+| Model | Description |
+|---|---|
+| `gemini-2.5-flash` | Fast and efficient — best for most tasks (default) |
+| `gemini-2.5-pro` | More capable — best for complex reasoning and analysis |
 
 </details>
 
----
+
+## Getting Your Gemini API Key
 
 <details>
-<summary><strong>API Key Referance</strong></summary>
+<summary><strong>Steps</strong></summary>
 
-All tools require a valid Google Gemini API key. Here's how to obtain one:
-
-### Step 1: Create Google Cloud Project
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select an existing one
-3. Enable the **Gemini API** from the API Library
-
-### Step 2: Create API Credentials
-
-1. Navigate to **Credentials** in Google Cloud Console
-2. Click **+ Create Credentials** → **API Key**
-3. Copy the generated API key
-
-### Step 3: Authenticate
-
-Use your API key in the `gemini_api_key` parameter for each request.
-
-Refer to [Google Gemini API Documentation](https://ai.google.dev/docs) for detailed setup steps.
-
-### Step 4: Required Scopes
-
-Ensure your API key has access to:
-
-- `generativelanguage.googleapis.com` — Text generation API
+1. Go to [Google AI Studio](https://aistudio.google.com) and sign in with your Google account
+2. Navigate to **API Keys** in the left sidebar
+3. Click **Create API Key**
+4. Copy the generated key — you will only see it once
 
 </details>
 
----
+
+## Troubleshooting
 
 <details>
-<summary><strong>Troubleshooting</strong></summary>
+<summary><strong>Missing or Invalid Headers</strong></summary>
 
-### **Missing or Invalid API Key**
-
-- **Cause:** API key not provided in request or incorrect format
+- **Cause:** API key not provided in request headers or incorrect format
 - **Solution:**
-  1. Verify `gemini_api_key` parameter is present in request
-  2. Check API key is active in your Google Cloud account
-  3. Regenerate API key if expired
+  1. Verify `Authorization: Bearer YOUR_API_KEY` and `X-Mewcp-Credential-Id: CREDENTIAL-ID` headers are present
+  2. Check API key is active in your MewCP account
 
-### **Insufficient Credits**
+</details>
 
-- **Cause:** API calls have exceeded your requests limits
+<details>
+<summary><strong>Insufficient Credits</strong></summary>
+
+- **Cause:** API calls have exceeded your request limits
 - **Solution:**
   1. Check credit usage in your Curious Layer dashboard
   2. Upgrade to a paid plan or add credits for higher limits
   3. Contact support for credit adjustments
 
-### **Malformed Request Payload**
+</details>
+
+<details>
+<summary><strong>Credential Not Connected</strong></summary>
+
+- **Cause:** No Gemini API key linked to your account
+- **Solution:**
+  1. Go to **Credentials** in your MewCP dashboard
+  2. Add your Google Gemini API key
+  3. Retry the request with the correct `X-Mewcp-Credential-Id` header
+
+</details>
+
+<details>
+<summary><strong>Malformed Request Payload</strong></summary>
 
 - **Cause:** JSON payload is invalid or missing required fields
 - **Solution:**
   1. Validate JSON syntax before sending
-  2. Ensure all required parameters (`query`, `gemini_api_key`) are included
-  3. Check parameter types match expected values (string)
+  2. Ensure the `query` parameter is included and non-empty
+  3. Check the `model` value matches one of the supported model names
 
-### **Server Not Found**
+</details>
+
+<details>
+<summary><strong>Server Not Found</strong></summary>
 
 - **Cause:** Incorrect server name in the API endpoint
 - **Solution:**
-  1. Verify endpoint format: `/mcp/{server-name}/{tool-name}`
-  2. Use lowercase server name: `/mcp/cl-llm-query/...`
-  3. Check available servers in documentation
-
-### **API Key Invalid or Expired**
-
-- **Cause:** API key rejected by Google or has expired
-- **Solution:**
-  1. Generate a fresh API key from Google Cloud Console
-  2. Verify API key has Gemini API enabled
-  3. Check key expiration and regenerate if needed
+  1. Verify endpoint format: `{server-name}/mcp/{tool-name}`
+  2. Use correct server name from documentation
+  3. Check available servers in your Curious Layer account
 
 </details>
-
----
 
 <details>
-<summary><strong>Resources</strong></summary>
+<summary><strong>Gemini API Error</strong></summary>
 
-- **[Google Gemini API](https://aistudio.google.com/api-keys)** — Official Gen AI API reference
-- **[Google Cloud Console](https://console.cloud.google.com/)** — Credentials management
-- **[Gemini API Reference](https://ai.google.dev/api)** — Complete Gemini API endpoint reference
-- **[FastMCP Docs](https://gofastmcp.com/v2/getting-started/welcome)** — FastMCP specification
-- **[FastMCP Credentials](https://pypi.org/project/fastmcp-credentials/)** — FastMCP Credentials pakage for credentials handlings.
+- **Cause:** Upstream Google Gemini API returned an error
+- **Solution:**
+  1. Check Google Cloud status at [Google Status](https://status.cloud.google.com)
+  2. Verify your API key has access to the Gemini API and the selected model
+  3. Review the error message returned in the response for specific details
+
 </details>
 
 ---
+
+### Resources
+
+- **[Google AI Studio](https://aistudio.google.com)** — Manage API keys and test Gemini models
+- **[Gemini API Documentation](https://ai.google.dev/gemini-api/docs)** — Official API reference
+- **[Gemini Models Overview](https://ai.google.dev/gemini-api/docs/models)** — Available models and capabilities
+- **[FastMCP Docs](https://gofastmcp.com/v2/getting-started/welcome)** — FastMCP specification
+- **[FastMCP Credentials](https://pypi.org/project/fastmcp-credentials/)** — FastMCP Credentials package for credential handling
