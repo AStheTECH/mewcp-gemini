@@ -13,7 +13,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("gemini-mcp-server")
 
 
-# Select credential backend based on deployment mode
 backend = HeaderCredentialBackend()
 
 mcp = FastMCP(

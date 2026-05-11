@@ -19,14 +19,13 @@ def register_tools(mcp: FastMCP) -> None:
             description="Gemini model name, e.g., 'gemini-2.5-flash' or 'gemini-2.5-pro'.",
         ),
     ) -> GeminiGenerateTextResponse:
-        """
-        Returns:
-            A dictionary containing the original prompt and generated text response.
-        """
         creds = get_credentials()
-        headers = {"Content-Type": "application/json"}
-        params = {"key": creds.fields["api_key"]}
+        api_key = creds.fields.get("api_key")
+        if not api_key:
+            raise ValueError("No API key found in credential fields")
 
+        headers = {"Content-Type": "application/json"}
+        params = {"key": api_key}
         body = {"contents": [{"parts": [{"text": query}]}]}
 
         try:
@@ -38,11 +37,8 @@ def register_tools(mcp: FastMCP) -> None:
                 timeout=20,
             )
             data = response.json()
-            print(data)
             text = data["candidates"][0]["content"]["parts"][0]["text"]
             return {"prompt": query, "response": text}
 
         except Exception as e:
             raise ToolError(str(e))
-        finally:
-            pass

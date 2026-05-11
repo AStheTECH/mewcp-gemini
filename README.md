@@ -2,6 +2,7 @@
 
 A Model Context Protocol (MCP) server that exposes Google Gemini's API for generating text using state-of-the-art large language models.
 
+---
 
 ## Overview
 
@@ -17,6 +18,7 @@ Perfect for:
 - Generating summaries, translations, code, or creative content
 - Augmenting workflows with Gemini's reasoning and language capabilities
 
+---
 
 ## Tools
 
@@ -26,10 +28,9 @@ Perfect for:
 Sends a prompt to Google Gemini and returns the generated text response.
 
 **Inputs:**
-```
+
 - `query` (string, required) — Natural language prompt to send to Gemini
-- `model` (string, optional) — Gemini model to use: gemini-2.5-flash (default) or gemini-2.5-pro
-```
+- `model` (string, optional) — Gemini model to use: `gemini-2.5-flash` (default) or `gemini-2.5-pro`
 
 **Output:**
 
@@ -40,13 +41,25 @@ Sends a prompt to Google Gemini and returns the generated text response.
 }
 ```
 
+**Usage Example:**
+
+```bash
+POST /mcp/gemini/gemini_ai_generate_text
+
+{
+  "query": "Summarize the history of the internet",
+  "model": "gemini-2.5-flash"
+}
+```
+
 </details>
 
-
-## API Parameters Reference
+---
 
 <details>
-<summary><strong>Available Models</strong></summary>
+<summary><strong>API Parameters Reference</strong></summary>
+
+### Available Models
 
 | Model | Description |
 |---|---|
@@ -55,29 +68,59 @@ Sends a prompt to Google Gemini and returns the generated text response.
 
 </details>
 
-
-## Getting Your Gemini API Key
+---
 
 <details>
-<summary><strong>Steps</strong></summary>
+<summary><strong>Authentication Setup</strong></summary>
 
-1. Go to [Google AI Studio](https://aistudio.google.com) and sign in with your Google account
-2. Navigate to **API Keys** in the left sidebar
+All tools authenticate via a Gemini API key stored in MewCP credentials. Here's the full setup:
+
+### Step 1: Get Your Gemini API Key
+
+1. Go to [Google AI Studio API Keys](https://aistudio.google.com/app/apikey)
+2. Sign in with your Google account
 3. Click **Create API Key**
-4. Copy the generated key — you will only see it once
+4. Select or create a Google Cloud project to associate with the key
+5. Copy the generated key — store it securely, you will only see it once
+
+Refer to the [Gemini API Key documentation](https://ai.google.dev/gemini-api/docs/api-key) for details.
+
+### Step 2: Add the Key to MewCP
+
+1. Go to your MewCP dashboard → **Credentials**
+2. Click **Add Credential** and select **Gemini**
+3. Paste your Gemini API key in the **API Key** field
+4. Save — note the credential ID assigned to it
+
+### Step 3: Authenticate Your Requests
+
+Include both headers in every request to the MewCP gateway:
+
+```http
+Authorization: Bearer <YOUR_MEWCP_API_KEY>
+X-Mewcp-Credential-Id: <YOUR_CREDENTIAL_ID>
+```
+
+The gateway resolves the stored Gemini API key from the credential ID and injects it into the server transparently — your Gemini key never travels in the request body.
 
 </details>
 
+---
 
 ## Troubleshooting
 
 <details>
-<summary><strong>Missing or Invalid Headers</strong></summary>
+<summary><strong>Missing or Invalid API Key</strong></summary>
 
-- **Cause:** API key not provided in request headers or incorrect format
+- **Cause:** MewCP authentication headers are missing or the credential is invalid
 - **Solution:**
-  1. Verify `Authorization: Bearer YOUR_API_KEY` and `X-Mewcp-Credential-Id: CREDENTIAL-ID` headers are present
-  2. Check API key is active in your MewCP account
+  1. Verify both headers are present in your request:
+     ```http
+     Authorization: Bearer <YOUR_MEWCP_API_KEY>
+     X-Mewcp-Credential-Id: <YOUR_CREDENTIAL_ID>
+     ```
+  2. Check your MewCP API key is valid in your MewCP account
+  3. Confirm the credential ID corresponds to a saved Gemini credential
 
 </details>
 
@@ -86,7 +129,7 @@ Sends a prompt to Google Gemini and returns the generated text response.
 
 - **Cause:** API calls have exceeded your request limits
 - **Solution:**
-  1. Check credit usage in your Curious Layer dashboard
+  1. Check usage limits in your MewCP dashboard
   2. Upgrade to a paid plan or add credits for higher limits
   3. Contact support for credit adjustments
 
@@ -119,9 +162,9 @@ Sends a prompt to Google Gemini and returns the generated text response.
 
 - **Cause:** Incorrect server name in the API endpoint
 - **Solution:**
-  1. Verify endpoint format: `{server-name}/mcp/{tool-name}`
+  1. Verify endpoint format: `/mcp/{server-name}/{tool-name}`
   2. Use correct server name from documentation
-  3. Check available servers in your Curious Layer account
+  3. Check available servers in your MewCP account
 
 </details>
 
@@ -138,10 +181,13 @@ Sends a prompt to Google Gemini and returns the generated text response.
 
 ---
 
-### Resources
+<details>
+<summary><strong>Resources</strong></summary>
 
 - **[Google AI Studio](https://aistudio.google.com)** — Manage API keys and test Gemini models
 - **[Gemini API Documentation](https://ai.google.dev/gemini-api/docs)** — Official API reference
 - **[Gemini Models Overview](https://ai.google.dev/gemini-api/docs/models)** — Available models and capabilities
 - **[FastMCP Docs](https://gofastmcp.com/v2/getting-started/welcome)** — FastMCP specification
-- **[FastMCP Credentials](https://pypi.org/project/fastmcp-credentials/)** — FastMCP Credentials package for credential handling
+- **[fastmcp-credentials package](https://github.com/AStheTECH/fastmcp-credentials)** — FastMCP Credentials specification
+
+</details>

@@ -1,3 +1,14 @@
+# Local AI/editor config stores
+.claude/
+.cursor/
+.windsurf/
+.roo/
+.vscode/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
 venv/*
 
 # Byte-compiled / optimized / DLL files
