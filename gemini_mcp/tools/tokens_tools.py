@@ -36,8 +36,8 @@ def register_tokens_tools(mcp: FastMCP) -> None:
                 "The input given to the model as a prompt (array of Content). Each item: `role` "
                 "(str, optional, 'user' or 'model'; useful for multi-turn input), `parts` (array of Part). "
                 "Each Part holds exactly one of `text` (inline text), `inlineData` {`mimeType`, "
-                "`data` (base64 bytes)}, or `fileData` {`fileUri` (required within fileData; the `uri` "
-                "from create_file/get_file), `mimeType` (optional)}. "
+                "`data` (base64 bytes)}, or `fileData` {`fileUri` (required within fileData), "
+                "`mimeType` (optional)}. "
                 "Example: [{\"parts\": [{\"text\": \"Hello\"}]}]."
             ),
         ),
