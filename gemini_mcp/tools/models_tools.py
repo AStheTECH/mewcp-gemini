@@ -30,7 +30,7 @@ def register_models_tools(mcp: FastMCP) -> None:
         annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=True),
     )
     def list_models(
-        page_size: int | None = Field(default=None, description="Maximum number of models to return per page. Omit for 50; values above 1000 return at most 1000."),
+        page_size: int | None = Field(default=None, description="Maximum number of models to return per page. Between 1 and 1000; omit for 50."),
         page_token: str | None = Field(default=None, description="`nextPageToken` from a previous list_models call, to get the next page. Other parameters must match that call. Omit for the first page."),
     ) -> ModelListResult:
         tlog = ToolLogger(logger, "list_models")
