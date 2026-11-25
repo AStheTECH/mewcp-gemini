@@ -19,8 +19,11 @@ def _get_credential() -> str:
     return value
 
 
-def _auth_params() -> dict[str, str]:
-    return {"key": _get_credential()}
+def _auth_headers() -> dict[str, str]:
+    return {
+        "x-goog-api-key": _get_credential(),
+        "Content-Type": "application/json",
+    }
 
 
 def _parse_retry_after(header: str | None) -> int | None:
@@ -42,15 +45,8 @@ def api_request(
     if timeout is None:
         timeout = (CONNECT_TIMEOUT, READ_TIMEOUT)
     url = f"{GEMINI_API_BASE}{endpoint}"
-    merged_params = {**(params or {}), **_auth_params()}
-    resp = requests.request(
-        method=method,
-        url=url,
-        headers={"Content-Type": "application/json"},
-        json=body,
-        params=merged_params,
-        timeout=timeout,
-    )
+    resp = requests.request(method=method, url=url, headers=_auth_headers(),
+                            json=body, params=params, timeout=timeout)
     try:
         data = resp.json()
     except Exception:
