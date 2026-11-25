@@ -35,8 +35,8 @@ def register_models_tools(mcp: FastMCP) -> None:
     ) -> ModelListResult:
         tlog = ToolLogger(logger, "list_models")
 
-        if page_size is not None and page_size < 1:
-            return _err(ModelListResult, tlog, "VALIDATION_ERROR", "page_size must be at least 1", 400)
+        if page_size is not None and not 1 <= page_size <= 1000:
+            return _err(ModelListResult, tlog, "VALIDATION_ERROR", "page_size must be between 1 and 1000", 400)
 
         params: dict[str, object] = {}
         if page_size is not None:
