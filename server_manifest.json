@@ -1,0 +1,1045 @@
+{
+  "manifest_version": 1,
+  "server": {
+    "name": "mewcp-gemini",
+    "package": "gemini_mcp",
+    "auth": "static",
+    "version": "v2.0.0",
+    "api_base": "https://generativelanguage.googleapis.com"
+  },
+  "tools": {
+    "groups": {
+      "decisions": {
+        "file": "decisions_tools.py",
+        "doc_source": "decisions/",
+        "register_fn": "register_decisions_tools",
+        "tools": {
+          "create_decision": {
+            "doc_file": "decisions/create_decision.md",
+            "endpoint": "POST /v1beta/decisions",
+            "description": "Evaluates one or more structured decision questions (yes/no probability, multiple choice, or graded score) against a shared input and returns one calibrated answer per question, keyed by the question IDs you supplied.",
+            "tier": "GET",
+            "params": [
+              {
+                "name": "model",
+                "type": "string",
+                "required": true,
+                "description": "The name of the Model used for evaluating the decisions, e.g. `gemini-decision-1`."
+              },
+              {
+                "name": "input",
+                "type": "string | array",
+                "required": true,
+                "description": "Shared input prefix evaluated once across all decision questions. A direct string, or DecisionInputContent block(s): `{\"type\": \"text\", \"text\": ...}`, `{\"type\": \"image\", \"data\"/\"uri\", \"mime_type\"}`, `{\"type\": \"audio\", ...}`, `{\"type\": \"video\", ...}`, `{\"type\": \"document\", ...}`."
+              },
+              {
+                "name": "questions",
+                "type": "object",
+                "required": true,
+                "description": "The decision questions to evaluate, keyed by caller-defined unique question identifiers (at least 1). Each question is `{type, instructions, criteria}`: `type` is `noul` (probability a statement is true), `choice` (pick one named option) or `score` (graded scale); `instructions` says what to decide; `criteria` depends on `type` \u2014 `noul`: `{\"true_description\": ..., \"false_description\": ...}`; `choice`: object mapping each option key to its description; `score`: ordered array of level descriptions, lowest first (level i = array index)."
+              }
+            ],
+            "response_fields": [
+              {
+                "name": "answers",
+                "type": "object"
+              },
+              {
+                "name": "answers.<id>.type",
+                "type": "string"
+              },
+              {
+                "name": "answers.<id>.confidence",
+                "type": "number"
+              },
+              {
+                "name": "answers.<id>.noul",
+                "type": "number"
+              },
+              {
+                "name": "answers.<id>.choice",
+                "type": "string"
+              },
+              {
+                "name": "answers.<id>.probabilities",
+                "type": "object"
+              },
+              {
+                "name": "answers.<id>.score",
+                "type": "number"
+              },
+              {
+                "name": "answers.<id>.legend",
+                "type": "object"
+              },
+              {
+                "name": "usage",
+                "type": "Usage"
+              },
+              {
+                "name": "usage.total_input_tokens",
+                "type": "integer"
+              },
+              {
+                "name": "usage.total_output_tokens",
+                "type": "integer"
+              },
+              {
+                "name": "usage.total_tokens",
+                "type": "integer"
+              },
+              {
+                "name": "usage.input_tokens_by_modality",
+                "type": "ModalityTokens array"
+              },
+              {
+                "name": "prompt_feedback",
+                "type": "PromptFeedback"
+              },
+              {
+                "name": "prompt_feedback.block_reason",
+                "type": "string enum"
+              },
+              {
+                "name": "prompt_feedback.block_reason_message",
+                "type": "string"
+              }
+            ],
+            "schema": {
+              "data": "CreateDecisionData",
+              "result": "CreateDecisionResult"
+            }
+          }
+        }
+      },
+      "embeddings": {
+        "file": "embeddings_tools.py",
+        "doc_source": "embeddings/",
+        "register_fn": "register_embeddings_tools",
+        "tools": {
+          "embed_content": {
+            "doc_file": "embeddings/embed_content.md",
+            "endpoint": "POST /v1/models/{model}:embedContent",
+            "description": "Generates an embedding vector from input content using a Gemini embedding model, for semantic search, classification, and clustering.",
+            "tier": "GET",
+            "params": [
+              {
+                "name": "model",
+                "type": "string",
+                "required": true,
+                "description": "The model ID, for example `gemini-embedding-001`. Fills the `{model}` path segment; the body `model` field is sent as the resource name `models/{model}`."
+              },
+              {
+                "name": "content",
+                "type": "Content",
+                "required": true,
+                "description": "The content to embed. Only the `parts.text` fields will be counted. Fields: `parts` (Part array): Ordered `Parts` that constitute a single message. Parts may have different MIME types. `parts[].text` (string): Inline text. `parts[].inlineData` (Blob): Inline media bytes (`mimeType`, `data`). `parts[].fileData` (FileData): URI based data (`fileUri` required, `mimeType` optional). `role` (string): The producer of the content. Must be either 'user' or 'model'. Allowed: user, model."
+              },
+              {
+                "name": "embedContentConfig",
+                "type": "EmbedContentConfig",
+                "required": false,
+                "description": "Configuration for the EmbedContent request. Fields: `title` (string): The title for the text. `taskType` (TaskType): The task type of the embedding. `TASK_TYPE_UNSPECIFIED` (defaults to one of the others), `RETRIEVAL_QUERY` (query in a search/retrieval setting), `RETRIEVAL_DOCUMENT` (document from the corpus being searched), `SEMANTIC_SIMILARITY` (STS), `CLASSIFICATION`, `CLUSTERING`, `QUESTION_ANSWERING`, `FACT_VERIFICATION`, `CODE_RETRIEVAL_QUERY`. Allowed: TASK_TYPE_UNSPECIFIED, RETRIEVAL_QUERY, RETRIEVAL_DOCUMENT, SEMANTIC_SIMILARITY, CLASSIFICATION, CLUSTERING, QUESTION_ANSWERING, FACT_VERIFICATION, CODE_RETRIEVAL_QUERY. `autoTruncate` (boolean): Whether to silently truncate the input content if it's longer than the maximum sequence length. `outputDimensionality` (integer): Reduced dimension for the output embedding. If set, excessive values in the output embedding are truncated from the end. `documentOcr` (boolean): Whether to enable OCR for document content. `audioTrackExtraction` (boolean): Whether to extract audio from video content."
+              }
+            ],
+            "response_fields": [
+              {
+                "name": "embedding",
+                "type": "ContentEmbedding"
+              },
+              {
+                "name": "embedding.values",
+                "type": "number array"
+              },
+              {
+                "name": "embedding.shape",
+                "type": "integer array"
+              },
+              {
+                "name": "usageMetadata",
+                "type": "EmbeddingUsageMetadata"
+              },
+              {
+                "name": "usageMetadata.promptTokenCount",
+                "type": "integer"
+              },
+              {
+                "name": "usageMetadata.promptTokenDetails",
+                "type": "ModalityTokenCount array"
+              },
+              {
+                "name": "usageMetadata.promptTokenDetails[].modality",
+                "type": "GenerativeLanguageModality"
+              },
+              {
+                "name": "usageMetadata.promptTokenDetails[].tokenCount",
+                "type": "integer"
+              }
+            ],
+            "schema": {
+              "data": "EmbedContentData",
+              "result": "EmbedContentResult"
+            }
+          }
+        }
+      },
+      "interactions": {
+        "file": "interactions_tools.py",
+        "doc_source": "interactions/",
+        "register_fn": "register_interactions_tools",
+        "tools": {
+          "create_interaction": {
+            "doc_file": "interactions/create_interaction.md",
+            "endpoint": "POST /v1/interactions",
+            "description": "Sends text or multimodal input to a Gemini model or agent and returns the generated interaction, including its output and id.",
+            "tier": "CREATE",
+            "params": [
+              {
+                "name": "model",
+                "type": "str",
+                "required": true,
+                "description": "Body. The name of the `Model` used for generating the interaction (API requires it when `agent` is not sent; this tool does not expose `agent`).",
+                "enum": [
+                  "gemma-4-26b-a4b-it",
+                  "gemma-4-31b-it",
+                  "gemini-2.5-flash",
+                  "gemini-2.5-pro",
+                  "gemini-2.5-flash-lite",
+                  "gemini-3.5-flash-lite",
+                  "gemini-3.1-flash-lite",
+                  "gemini-3.5-flash",
+                  "gemini-3.6-flash",
+                  "gemini-3.7-flash",
+                  "gemini-3.8-flash",
+                  "gemini-4-argon",
+                  "gemini-4-carbon",
+                  "gemini-4-hydrogen",
+                  "gemini-4-neon"
+                ]
+              },
+              {
+                "name": "input",
+                "type": "str | list[dict]",
+                "required": true,
+                "description": "Body. The inputs for the interaction: a plain string, or content blocks such as `{\"type\": \"text\", \"text\": \"...\"}` or `{\"type\": \"image\", \"uri\": \"<public https url>\", \"mime_type\": \"image/png\"}` (video, audio and document blocks take the same `uri` + `mime_type` shape). On `v1` content blocks must be sent inside a `user_input` step: `[{\"type\": \"user_input\", \"content\": [...]}]`; a bare content array is rejected. Files go in as public HTTPS or pre-signed links, up to 15 MB per file."
+              },
+              {
+                "name": "system_instruction",
+                "type": "str",
+                "required": false,
+                "description": "Body. System instruction for the interaction."
+              },
+              {
+                "name": "previous_interaction_id",
+                "type": "str",
+                "required": false,
+                "description": "Body. The ID of the previous interaction, if any. Continues a stateful conversation server-side."
+              },
+              {
+                "name": "thinking_level",
+                "type": "str",
+                "required": false,
+                "description": "Body, sent as `generation_config.thinking_level`. The level of thought tokens that the model should generate.",
+                "enum": [
+                  "minimal",
+                  "low",
+                  "medium",
+                  "high",
+                  "xhigh"
+                ]
+              },
+              {
+                "name": "max_output_tokens",
+                "type": "int",
+                "required": false,
+                "description": "Body, sent as `generation_config.max_output_tokens`. The maximum number of tokens to include in the response."
+              },
+              {
+                "name": "google_search",
+                "type": "bool",
+                "required": false,
+                "description": "Adds `{\"type\": \"google_search\"}` to `tools` (Google Search grounding).",
+                "default": false
+              },
+              {
+                "name": "code_execution",
+                "type": "bool",
+                "required": false,
+                "description": "Adds `{\"type\": \"code_execution\"}` to `tools` (Python code execution in Google's sandbox).",
+                "default": false
+              }
+            ],
+            "response_fields": [
+              {
+                "name": "id",
+                "type": "str"
+              },
+              {
+                "name": "status",
+                "type": "str"
+              },
+              {
+                "name": "created",
+                "type": "str"
+              },
+              {
+                "name": "updated",
+                "type": "str"
+              },
+              {
+                "name": "steps",
+                "type": "list[dict]"
+              },
+              {
+                "name": "steps[].type",
+                "type": "str"
+              },
+              {
+                "name": "steps[].content",
+                "type": "list[dict]"
+              },
+              {
+                "name": "steps[].arguments.queries",
+                "type": "list[str]"
+              },
+              {
+                "name": "steps[].arguments.code",
+                "type": "str"
+              },
+              {
+                "name": "steps[].arguments.language",
+                "type": "str"
+              },
+              {
+                "name": "steps[].call_id",
+                "type": "str"
+              },
+              {
+                "name": "steps[].is_error",
+                "type": "bool"
+              },
+              {
+                "name": "steps[].result",
+                "type": "list[dict] | str"
+              },
+              {
+                "name": "steps[].content[].type",
+                "type": "str"
+              },
+              {
+                "name": "steps[].content[].text",
+                "type": "str"
+              },
+              {
+                "name": "steps[].content[].annotations",
+                "type": "list[dict]"
+              },
+              {
+                "name": "steps[].content[].data",
+                "type": "str"
+              },
+              {
+                "name": "steps[].content[].mime_type",
+                "type": "str"
+              },
+              {
+                "name": "steps[].content[].uri",
+                "type": "str"
+              },
+              {
+                "name": "model",
+                "type": "str"
+              },
+              {
+                "name": "agent",
+                "type": "str"
+              },
+              {
+                "name": "previous_interaction_id",
+                "type": "str"
+              },
+              {
+                "name": "system_instruction",
+                "type": "str"
+              },
+              {
+                "name": "tools",
+                "type": "list[dict]"
+              },
+              {
+                "name": "input",
+                "type": "str | list[dict]"
+              },
+              {
+                "name": "continuation_token",
+                "type": "str"
+              },
+              {
+                "name": "errors",
+                "type": "list[dict]"
+              },
+              {
+                "name": "usage",
+                "type": "dict"
+              },
+              {
+                "name": "usage.total_input_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.initial_input_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.total_output_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.total_thought_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.total_cached_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.total_tool_use_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.total_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.input_tokens_by_modality",
+                "type": "list[dict]"
+              },
+              {
+                "name": "usage.output_tokens_by_modality",
+                "type": "list[dict]"
+              },
+              {
+                "name": "usage.cached_tokens_by_modality",
+                "type": "list[dict]"
+              },
+              {
+                "name": "usage.tool_use_tokens_by_modality",
+                "type": "list[dict]"
+              },
+              {
+                "name": "usage.grounding_tool_count",
+                "type": "list[dict]"
+              }
+            ],
+            "schema": {
+              "data": "CreateInteractionData",
+              "result": "CreateInteractionResult"
+            }
+          },
+          "start_deep_research": {
+            "doc_file": "interactions/start_deep_research.md",
+            "endpoint": "POST /v1beta/interactions",
+            "description": "Starts Gemini's Deep Research agent in the background on a research question; the agent plans, searches the web, reads sources and writes a detailed cited report. Returns the interaction ID immediately; the finished report is read with get_interaction.",
+            "tier": "CREATE",
+            "params": [
+              {
+                "name": "query",
+                "type": "str",
+                "required": true,
+                "description": "Body, sent as `input`. The research question plus any context or constraints."
+              },
+              {
+                "name": "max",
+                "type": "bool",
+                "required": false,
+                "description": "Picks the agent: `false` sends `agent: deep-research-preview-04-2026` (Deep Research, speed and efficiency); `true` sends `deep-research-max-preview-04-2026` (Deep Research Max, maximum comprehensiveness).",
+                "default": false
+              }
+            ],
+            "response_fields": [
+              {
+                "name": "id",
+                "type": "str"
+              },
+              {
+                "name": "status",
+                "type": "str"
+              },
+              {
+                "name": "agent",
+                "type": "str"
+              },
+              {
+                "name": "created",
+                "type": "str"
+              }
+            ],
+            "schema": {
+              "data": "StartDeepResearchData",
+              "result": "StartDeepResearchResult"
+            }
+          },
+          "get_interaction": {
+            "doc_file": "interactions/get_interaction.md",
+            "endpoint": "GET /v1/interactions/{id}",
+            "description": "Retrieves the full details of a single interaction by id, including its status and outputs; use it to poll background jobs.",
+            "tier": "GET",
+            "params": [
+              {
+                "name": "id",
+                "type": "str",
+                "required": true,
+                "description": "Path. The unique identifier of the interaction to retrieve."
+              }
+            ],
+            "response_fields": [
+              {
+                "name": "id",
+                "type": "str"
+              },
+              {
+                "name": "status",
+                "type": "str"
+              },
+              {
+                "name": "created",
+                "type": "str"
+              },
+              {
+                "name": "updated",
+                "type": "str"
+              },
+              {
+                "name": "steps",
+                "type": "list[dict]"
+              },
+              {
+                "name": "steps[].type",
+                "type": "str"
+              },
+              {
+                "name": "steps[].content",
+                "type": "list[dict]"
+              },
+              {
+                "name": "steps[].content[].type",
+                "type": "str"
+              },
+              {
+                "name": "steps[].content[].text",
+                "type": "str"
+              },
+              {
+                "name": "steps[].content[].annotations",
+                "type": "list[dict]"
+              },
+              {
+                "name": "steps[].content[].data",
+                "type": "str"
+              },
+              {
+                "name": "steps[].content[].mime_type",
+                "type": "str"
+              },
+              {
+                "name": "steps[].content[].uri",
+                "type": "str"
+              },
+              {
+                "name": "model",
+                "type": "str"
+              },
+              {
+                "name": "agent",
+                "type": "str"
+              },
+              {
+                "name": "previous_interaction_id",
+                "type": "str"
+              },
+              {
+                "name": "system_instruction",
+                "type": "str"
+              },
+              {
+                "name": "tools",
+                "type": "list[dict]"
+              },
+              {
+                "name": "input",
+                "type": "str | list[dict]"
+              },
+              {
+                "name": "continuation_token",
+                "type": "str"
+              },
+              {
+                "name": "errors",
+                "type": "list[dict]"
+              },
+              {
+                "name": "usage",
+                "type": "dict"
+              },
+              {
+                "name": "usage.total_input_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.initial_input_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.total_output_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.total_thought_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.total_cached_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.total_tool_use_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.total_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.input_tokens_by_modality",
+                "type": "list[dict]"
+              },
+              {
+                "name": "usage.output_tokens_by_modality",
+                "type": "list[dict]"
+              },
+              {
+                "name": "usage.cached_tokens_by_modality",
+                "type": "list[dict]"
+              },
+              {
+                "name": "usage.tool_use_tokens_by_modality",
+                "type": "list[dict]"
+              },
+              {
+                "name": "usage.grounding_tool_count",
+                "type": "list[dict]"
+              }
+            ],
+            "schema": {
+              "data": "GetInteractionData",
+              "result": "GetInteractionResult"
+            }
+          },
+          "cancel_interaction": {
+            "doc_file": "interactions/cancel_interaction.md",
+            "endpoint": "POST /v1/interactions/{id}/cancel",
+            "description": "Cancels a background interaction that is still running and returns the updated interaction.",
+            "tier": "UPDATE",
+            "params": [
+              {
+                "name": "id",
+                "type": "str",
+                "required": true,
+                "description": "Path. The unique identifier of the interaction to cancel."
+              }
+            ],
+            "response_fields": [
+              {
+                "name": "id",
+                "type": "str"
+              },
+              {
+                "name": "status",
+                "type": "str"
+              },
+              {
+                "name": "created",
+                "type": "str"
+              },
+              {
+                "name": "updated",
+                "type": "str"
+              },
+              {
+                "name": "steps",
+                "type": "list[dict]"
+              },
+              {
+                "name": "steps[].type",
+                "type": "str"
+              },
+              {
+                "name": "steps[].content",
+                "type": "list[dict]"
+              },
+              {
+                "name": "steps[].content[].type",
+                "type": "str"
+              },
+              {
+                "name": "steps[].content[].text",
+                "type": "str"
+              },
+              {
+                "name": "steps[].content[].annotations",
+                "type": "list[dict]"
+              },
+              {
+                "name": "steps[].content[].data",
+                "type": "str"
+              },
+              {
+                "name": "steps[].content[].mime_type",
+                "type": "str"
+              },
+              {
+                "name": "steps[].content[].uri",
+                "type": "str"
+              },
+              {
+                "name": "model",
+                "type": "str"
+              },
+              {
+                "name": "agent",
+                "type": "str"
+              },
+              {
+                "name": "previous_interaction_id",
+                "type": "str"
+              },
+              {
+                "name": "system_instruction",
+                "type": "str"
+              },
+              {
+                "name": "tools",
+                "type": "list[dict]"
+              },
+              {
+                "name": "input",
+                "type": "str | list[dict]"
+              },
+              {
+                "name": "continuation_token",
+                "type": "str"
+              },
+              {
+                "name": "errors",
+                "type": "list[dict]"
+              },
+              {
+                "name": "usage",
+                "type": "dict"
+              },
+              {
+                "name": "usage.total_input_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.initial_input_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.total_output_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.total_thought_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.total_cached_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.total_tool_use_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.total_tokens",
+                "type": "int"
+              },
+              {
+                "name": "usage.input_tokens_by_modality",
+                "type": "list[dict]"
+              },
+              {
+                "name": "usage.output_tokens_by_modality",
+                "type": "list[dict]"
+              },
+              {
+                "name": "usage.cached_tokens_by_modality",
+                "type": "list[dict]"
+              },
+              {
+                "name": "usage.tool_use_tokens_by_modality",
+                "type": "list[dict]"
+              },
+              {
+                "name": "usage.grounding_tool_count",
+                "type": "list[dict]"
+              }
+            ],
+            "schema": {
+              "data": "CancelInteractionData",
+              "result": "CancelInteractionResult"
+            }
+          },
+          "delete_interaction": {
+            "doc_file": "interactions/delete_interaction.md",
+            "endpoint": "DELETE /v1/interactions/{id}",
+            "description": "Deletes a stored interaction by id.",
+            "tier": "DELETE",
+            "params": [
+              {
+                "name": "id",
+                "type": "str",
+                "required": true,
+                "description": "Path. The unique identifier of the interaction to delete."
+              }
+            ],
+            "response_fields": [],
+            "schema": {
+              "data": "DeleteInteractionData",
+              "result": "DeleteInteractionResult"
+            }
+          }
+        }
+      },
+      "models": {
+        "file": "models_tools.py",
+        "doc_source": "models/",
+        "register_fn": "register_models_tools",
+        "tools": {
+          "list_models": {
+            "doc_file": "models/list_models.md",
+            "endpoint": "GET /v1/models",
+            "description": "Lists the models available through the Gemini API with their token limits and supported generation methods.",
+            "tier": "GET",
+            "params": [
+              {
+                "name": "pageSize",
+                "type": "integer",
+                "required": false,
+                "description": "The maximum number of Models to return (per page). If unspecified, 50 models will be returned per page. This method returns at most 1000 models per page, even if you pass a larger page_size."
+              },
+              {
+                "name": "pageToken",
+                "type": "string",
+                "required": false,
+                "description": "A page token, received from a previous ListModels call. Provide the page_token returned by one request as an argument to the next request to retrieve the next page. When paginating, all other parameters provided to ListModels must match the call that provided the page token."
+              }
+            ],
+            "response_fields": [
+              {
+                "name": "models",
+                "type": "array of Model"
+              },
+              {
+                "name": "nextPageToken",
+                "type": "string"
+              },
+              {
+                "name": "models[].name",
+                "type": "string"
+              },
+              {
+                "name": "models[].baseModelId",
+                "type": "string"
+              },
+              {
+                "name": "models[].version",
+                "type": "string"
+              },
+              {
+                "name": "models[].displayName",
+                "type": "string"
+              },
+              {
+                "name": "models[].description",
+                "type": "string"
+              },
+              {
+                "name": "models[].inputTokenLimit",
+                "type": "integer (int32)"
+              },
+              {
+                "name": "models[].outputTokenLimit",
+                "type": "integer (int32)"
+              },
+              {
+                "name": "models[].supportedGenerationMethods",
+                "type": "array of string"
+              },
+              {
+                "name": "models[].thinking",
+                "type": "boolean"
+              },
+              {
+                "name": "models[].temperature",
+                "type": "number (float)"
+              },
+              {
+                "name": "models[].maxTemperature",
+                "type": "number (float)"
+              },
+              {
+                "name": "models[].topP",
+                "type": "number (float)"
+              },
+              {
+                "name": "models[].topK",
+                "type": "integer (int32)"
+              }
+            ],
+            "schema": {
+              "data": "ModelListData",
+              "result": "ModelListResult"
+            }
+          },
+          "get_model": {
+            "doc_file": "models/get_model.md",
+            "endpoint": "GET /v1/models/{model}",
+            "description": "Gets metadata for one model, such as its version, token limits, and default parameters.",
+            "tier": "GET",
+            "params": [
+              {
+                "name": "model",
+                "type": "string",
+                "required": true,
+                "description": "The model ID, for example gemini-2.5-flash. Forms the resource name models/{model}. This name should match a model name returned by the ListModels method."
+              }
+            ],
+            "response_fields": [
+              {
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "name": "baseModelId",
+                "type": "string"
+              },
+              {
+                "name": "version",
+                "type": "string"
+              },
+              {
+                "name": "displayName",
+                "type": "string"
+              },
+              {
+                "name": "description",
+                "type": "string"
+              },
+              {
+                "name": "inputTokenLimit",
+                "type": "integer (int32)"
+              },
+              {
+                "name": "outputTokenLimit",
+                "type": "integer (int32)"
+              },
+              {
+                "name": "supportedGenerationMethods",
+                "type": "array of string"
+              },
+              {
+                "name": "thinking",
+                "type": "boolean"
+              },
+              {
+                "name": "temperature",
+                "type": "number (float)"
+              },
+              {
+                "name": "maxTemperature",
+                "type": "number (float)"
+              },
+              {
+                "name": "topP",
+                "type": "number (float)"
+              },
+              {
+                "name": "topK",
+                "type": "integer (int32)"
+              }
+            ],
+            "schema": {
+              "data": "ModelData",
+              "result": "ModelResult"
+            }
+          }
+        }
+      },
+      "tokens": {
+        "file": "tokens_tools.py",
+        "doc_source": "tokens/",
+        "register_fn": "register_tokens_tools",
+        "tools": {
+          "count_tokens": {
+            "doc_file": "tokens/count_tokens.md",
+            "endpoint": "POST /v1/models/{model}:countTokens",
+            "description": "Runs a model's tokenizer on input content and returns the token count, without generating anything.",
+            "tier": "GET",
+            "params": [
+              {
+                "name": "model",
+                "type": "str",
+                "required": true,
+                "description": "Path. The model ID, for example `gemini-2.5-flash`. Forms the resource name `models/{model}`."
+              },
+              {
+                "name": "contents",
+                "type": "list[dict]",
+                "required": true,
+                "description": "Body. The input given to the model as a prompt (array of Content). Each item: `role` (str, optional, 'user' or 'model'), `parts` (array of Part). Each Part holds exactly one of `text` (inline text), `inlineData` {`mimeType`, `data` (base64 bytes)}, or `fileData` {`fileUri` (required within fileData; the `uri` from create_file/get_file), `mimeType` (optional)}."
+              }
+            ],
+            "response_fields": [
+              {
+                "name": "totalTokens",
+                "type": "int"
+              },
+              {
+                "name": "promptTokensDetails",
+                "type": "list[dict]"
+              },
+              {
+                "name": "promptTokensDetails[].modality",
+                "type": "str"
+              },
+              {
+                "name": "promptTokensDetails[].tokenCount",
+                "type": "int"
+              },
+              {
+                "name": "cacheTokensDetails",
+                "type": "list[dict]"
+              },
+              {
+                "name": "cacheTokensDetails[].modality",
+                "type": "str"
+              },
+              {
+                "name": "cacheTokensDetails[].tokenCount",
+                "type": "int"
+              }
+            ],
+            "schema": {
+              "data": "CountTokensData",
+              "result": "CountTokensResult"
+            }
+          }
+        }
+      }
+    }
+  },
+  "resources": {},
+  "prompts": {}
+}
