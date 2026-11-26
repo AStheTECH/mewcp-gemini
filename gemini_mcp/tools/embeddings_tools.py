@@ -21,6 +21,8 @@ _TASK_TYPES = {
     "SEMANTIC_SIMILARITY", "CLASSIFICATION", "CLUSTERING",
     "QUESTION_ANSWERING", "FACT_VERIFICATION", "CODE_RETRIEVAL_QUERY",
 }
+# gemini-embedding-001 ignores these inside embedContentConfig; top-level works on all models.
+_TOP_LEVEL_CONFIG = ("taskType", "title", "outputDimensionality")
 
 
 def register_embeddings_tools(mcp: FastMCP) -> None:
@@ -31,10 +33,16 @@ def register_embeddings_tools(mcp: FastMCP) -> None:
             "Generates an embedding vector for one piece of content using a Gemini embedding model "
             "(e.g. `gemini-embedding-001`, `gemini-embedding-2`; generation models are not supported), "
             "for semantic search, classification, and clustering. Returns the vector in "
-            "`embedding.values` plus prompt token usage per modality. Only `parts[].text` is counted; "
-            "for retrieval, embed queries with taskType RETRIEVAL_QUERY and corpus text with "
-            "RETRIEVAL_DOCUMENT. Use list_models to find models whose supportedGenerationMethods "
-            "include embedContent."
+            "`embedding.values` plus prompt token usage per modality (`gemini-embedding-001` returns no "
+            "usage). Only `parts[].text` is counted. Task type changes the vector, so for retrieval with "
+            "`gemini-embedding-001` embed queries with taskType RETRIEVAL_QUERY and corpus text with "
+            "RETRIEVAL_DOCUMENT, and use the same choice every time you embed the same kind of text. "
+            "`gemini-embedding-2` does not use taskType: put the task in the text instead, e.g. "
+            "`task: search result | query: <text>` for queries and `title: none | text: <text>` for "
+            "documents. Default size is 3072 dimensions; set `outputDimensionality` (768, 1536 or 3072 "
+            "recommended) to shrink it. `gemini-embedding-001` vectors below 3072 are not normalized, so "
+            "normalize them yourself before comparing. Use list_models to find models whose "
+            "supportedGenerationMethods include embedContent."
         ),
         annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=True),
     )
@@ -95,7 +103,12 @@ def register_embeddings_tools(mcp: FastMCP) -> None:
 
         body: dict[str, Any] = {"model": f"models/{model_id}", "content": content}
         if embedContentConfig:
-            body["embedContentConfig"] = embedContentConfig
+            config = dict(embedContentConfig)
+            for key in _TOP_LEVEL_CONFIG:
+                if key in config:
+                    body[key] = config.pop(key)
+            if config:
+                body["embedContentConfig"] = config
 
         try:
             data, status, retry_after = service.api_request(
