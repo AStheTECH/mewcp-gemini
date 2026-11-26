@@ -190,9 +190,11 @@ def register_interactions_tools(mcp: FastMCP) -> None:
         if tools:
             body["tools"] = tools
 
+        endpoint = "/v1beta/interactions" if tools else "/v1/interactions"
+
         try:
             data, status, retry_after = service.api_request(
-                "POST", "/v1/interactions", body=body,
+                "POST", endpoint, body=body,
                 timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),
             )
             if 200 <= status < 300:
